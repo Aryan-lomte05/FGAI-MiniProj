@@ -1,0 +1,12 @@
+{
+  "name": "mindbridge-frontend",
+  "version": "1.0.0",
+  "description": "MindBridge Frontend",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindBridge - Active Session</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* App Layout */
+    body {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--surface-2);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--surface);
+      border-right: 3px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .sidebar-header {
+      padding: 16px;
+      border-bottom: 3px solid var(--border);
+      background: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-header h2 {
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+    .session-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .session-item {
+      padding: 12px;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 2px 2px 0px #000;
+      transition: all 0.1s;
+    }
+    .session-item:hover {
+      background: var(--accent);
+    }
+    .session-item.active {
+      background: var(--border);
+      color: white;
+      box-shadow: none;
+      transform: translate(2px, 2px);
+    }
+
+    /* Main Chat Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .chat-header {
+      padding: 16px 24px;
+      background: var(--surface);
+      border-bottom: 3px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      background: var(--bg);
+    }
+
+    .message {
+      max-width: 80%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .message.user {
+      align-self: flex-end;
+    }
+    .message.assistant {
+      align-self: flex-start;
+    }
+
+    .msg-sender {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .message.user .msg-sender { text-align: right; }
+
+    .msg-bubble {
+      padding: 16px 20px;
+      border: 2px solid var(--border);
+      font-size: 15px;
+      line-height: 1.6;
+      box-shadow: 3px 3px 0px #000;
+      border-radius: 0;
+    }
+    .message.user .msg-bubble {
+      background: var(--accent);
+    }
+    .message.assistant .msg-bubble {
+      background: var(--surface);
+    }
+    .message.crisis .msg-bubble {
+      background: var(--surface);
+      border-color: var(--crisis);
+      box-shadow: 3px 3px 0px var(--crisis);
+    }
+
+    /* Input area */
+    .input-container {
+      padding: 24px;
+      background: var(--surface);
+      border-top: 3px solid var(--border);
+      display: flex;
+      gap: 16px;
+    }
+    .chat-input {
+      flex: 1;
+      resize: none;
+      height: 52px;
+      padding: 14px 16px;
+      font-size: 15px;
+      border: 2px solid var(--border);
+      box-shadow: inset 2px 2px 0px rgba(0,0,0,0.05);
+    }
+    .chat-input:focus {
+      box-shadow: 2px 2px 0px #000;
+      transform: translateY(-2px);
+    }
+    
+    .send-btn {
+      width: 52px; height: 52px;
+      background: var(--border);
+      color: white;
+      border: none;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 3px 3px 0px var(--accent);
+      transition: all 0.1s;
+    }
+    .send-btn:hover {
+      box-shadow: 4px 4px 0px var(--accent);
+      transform: translate(-1px, -1px);
+    }
+    .send-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0px 0px 0px var(--accent);
+    }
+
+    /* Markdown styling inside bubbles */
+    .msg-bubble p { margin-bottom: 10px; }
+    .msg-bubble p:last-child { margin-bottom: 0; }
+    .msg-bubble strong { font-weight: 700; color: #000; }
+    .msg-bubble ul { margin-left: 20px; margin-bottom: 10px; }
+
+    /* Crisis Banner */
+    #crisis-banner {
+      display: none;
+      background: var(--crisis);
+      color: white;
+      padding: 12px 24px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>SESSIONS</h2>
+      <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" id="new-btn">+ NEW</button>
+    </div>
+    <div class="session-list" id="session-list">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div id="crisis-banner">
+      <div class="flex items-center gap-2">
+        <span style="font-size: 20px;">⚠️</span>
+        <span>PRIORITY ALERT: If you are in distress, please contact iCall immediately at 9152987821.</span>
+      </div>
+      <button class="btn btn-outline" style="background: white; border-color: black; padding: 4px 12px; font-size: 11px;" onclick="dismissCrisis()">DISMISS</button>
+    </div>
+
+    <div class="chat-header">
+      <h3 style="font-size: 18px;" id="chat-title">New Conversation</h3>
+      <div class="flex gap-2">
+        <div class="tag tag-blue">STUDENT PROTOCOL</div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chat">
+      <!-- Initial greeting -->
+      <div class="message assistant">
+        <div class="msg-sender">MindBridge Core</div>
+        <div class="msg-bubble">
+          <p>Hi there. I'm MindBridge. I'm an AI designed to listen, help you figure out what you're feeling, and share some tools that might help.</p>
+          <p>Whatever is on your mind — college stress, feeling burnt out, or just feeling overwhelmed — you can talk about it here.</p>
+          <p>What's going on for you today?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <textarea id="msg-input" class="chat-input" placeholder="Type your message here... (Enter to send, Shift+Enter for new line)"></textarea>
+      <button id="send-btn" class="send-btn">
+        <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="dist/chat.js"></script>
+</body>
+</html>

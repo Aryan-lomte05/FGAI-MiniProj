@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindBridge - First Response</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Neo-brutalist specific layout for landing page */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      border-bottom: 2px solid var(--border);
+      background: var(--surface);
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 2px 2px 0px #000;
+    }
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .hero-content {
+      flex: 1;
+      display: flex;
+      padding: 64px 32px;
+      gap: 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hero-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+    }
+    .hero-title {
+      font-size: 5rem;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    .hero-subtitle {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      max-width: 500px;
+    }
+    .hero-visual {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .panel {
+      border: 3px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    
+    .panel-header {
+      background: var(--surface);
+      border-bottom: 3px solid var(--border);
+      padding: 12px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .panel-body {
+      padding: 24px;
+    }
+
+    .disclaimer-banner {
+      background: var(--surface-2);
+      border-top: 2px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <header class="header">
+      <div class="logo-container">
+        <div class="logo-icon">MB</div>
+        <div class="logo-text">MindBridge</div>
+      </div>
+      <div class="flex gap-3">
+        <div class="tag tag-yellow">BETA VERSION</div>
+        <button class="btn btn-outline" onclick="window.location.href='chat.html'">START CHAT &rarr;</button>
+      </div>
+    </header>
+
+    <main class="hero-content">
+      <div class="hero-text fade-in">
+        <h1 class="hero-title">First Responder<br>Protocol.</h1>
+        <p class="hero-subtitle">You don't have to carry it alone. An empathetic, RAG-powered checkpoint designed for students. Grounded in clinical literature, ready to listen right now.</p>
+        
+        <div class="flex gap-4" style="margin-top: 16px;">
+          <button class="btn btn-primary" style="padding: 16px 32px; font-size: 16px;" onclick="window.location.href='chat.html'">
+            START CONVERSATION
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-visual fade-in" style="animation-delay: 0.2s;">
+        <!-- Mockup Card 1 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span>SYSTEM HEALTH</span>
+            <div class="tag">ACTIVE</div>
+          </div>
+          <div class="panel-body flex gap-4">
+            <div style="flex: 1;">
+              <h3 style="font-size: 2rem; margin-bottom: 8px;">100%</h3>
+              <p class="text-muted" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">Confidentiality</p>
+            </div>
+            <div style="flex: 1; border-left: 2px solid var(--border); padding-left: 16px;">
+              <h3 style="font-size: 2rem; margin-bottom: 8px; color: var(--accent-dim);">24/7</h3>
+              <p class="text-muted" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">Availability</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup Card 2 -->
+        <div class="panel">
+          <div class="panel-header" style="background: var(--accent);">
+            <span>Core Knowledge Base</span>
+            <span>RAG PIPELINE</span>
+          </div>
+          <div class="panel-body" style="font-family: monospace; font-size: 13px; font-weight: 500; display: flex; flex-direction: column; gap: 8px;">
+            <div class="flex justify-between w-full" style="justify-content: space-between;">
+              <span>[✓] WHO mhGAP Guidelines</span>
+              <span>Loaded</span>
+            </div>
+            <div class="flex justify-between w-full" style="justify-content: space-between;">
+              <span>[✓] NIMHANS Student Support</span>
+              <span>Loaded</span>
+            </div>
+            <div class="flex justify-between w-full" style="justify-content: space-between;">
+              <span>[✓] CBT Grounding Techniques</span>
+              <span>Loaded</span>
+            </div>
+            <div class="flex justify-between w-full" style="justify-content: space-between;">
+              <span>[!] Two-Layer Crisis Classifier</span>
+              <span style="color: var(--crisis); font-weight: bold;">Armed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="disclaimer-banner">
+      <div class="flex items-center gap-2">
+        <div style="width: 8px; height: 8px; background: var(--crisis); border-radius: 50%;"></div>
+        <strong>MindBridge is an AI tool for informational purposes. It does not replace human care.</strong>
+      </div>
+      <div>If in crisis, call <strong>iCall: 9152987821</strong></div>
+    </footer>
+  </div>
+</body>
+</html>

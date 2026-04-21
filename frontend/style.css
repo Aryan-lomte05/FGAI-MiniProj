@@ -1,0 +1,194 @@
+/* ============================================================
+   MindBridge Design System — Neo-Brutalist Light Theme
+   Inspired by the provided images (Workforce Command dashboard)
+   Font: Space Grotesk (headings) + Inter (body)
+   Palette: White/Cream background, deep black borders/text, yellow accent
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Tokens ──────────────────────────────────────────────── */
+:root {
+  --bg:         #FFFCF9; /* Very light cream/off-white */
+  --surface:    #FFFFFF;
+  --surface-2:  #F5F5F5;
+  --border:     #000000;
+  --accent:     #FFD834; /* Bright flat yellow */
+  --accent-dim: #F0C814;
+  --text:       #000000;
+  --text-muted: #555555;
+  --text-dim:   #777777;
+  --crisis:     #FF3333;
+  --crisis-bg:  rgba(255, 51, 51, 0.15);
+  --success:    #00C48C;
+  --blue:       #00B6FF;
+  
+  --radius-sm:  0px; /* Sharp corners for neo-brutalism */
+  --radius:     0px;
+  --radius-lg:  0px;
+  
+  --shadow:     4px 4px 0px #000000; /* Hard drop shadow */
+  --shadow-sm:  2px 2px 0px #000000;
+  --shadow-hover: 6px 6px 0px #000000;
+  
+  --transition: 150ms ease-out;
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography ──────────────────────────────────────────── */
+h1, h2, h3, h4, h5 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--surface-2); border-left: 2px solid var(--border); }
+::-webkit-scrollbar-thumb { background: var(--text); }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+}
+.btn-primary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+}
+.btn-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #000;
+}
+.btn-outline:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+  background: var(--surface-2);
+}
+.btn-outline:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #000;
+}
+
+/* ── Generic card (Neo-Brutalist) ────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+/* ── Form Inputs ─────────────────────────────────────────── */
+input, textarea {
+  font-family: 'Inter', sans-serif;
+  border: 2px solid var(--border);
+  padding: 12px 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+input:focus, textarea:focus {
+  outline: none;
+  box-shadow: var(--shadow);
+  transform: translate(-2px, -2px);
+}
+
+/* ── Tag / badge ─────────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  box-shadow: 2px 2px 0px #000;
+}
+.tag-yellow { background: var(--accent); }
+.tag-red    { background: var(--crisis); color: white; }
+.tag-blue   { background: var(--blue); }
+
+/* ── Loader spinner ──────────────────────────────────────── */
+.spinner {
+  width: 18px; height: 18px;
+  border: 3px solid var(--border);
+  border-top-color: var(--surface);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Utility ─────────────────────────────────────────────── */
+.text-muted  { color: var(--text-muted); }
+.text-accent { color: var(--accent); }
+.flex        { display: flex; }
+.flex-col    { flex-direction: column; }
+.items-center { align-items: center; }
+.gap-2       { gap: 8px; }
+.gap-3       { gap: 12px; }
+.gap-4       { gap: 16px; }
+.w-full      { width: 100%; }
+
+/* ── Fade-in animation ───────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.4s ease forwards; }
+
+/* ── Dot pulse (typing indicator) ────────────────────────── */
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+.typing-dots span {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border: 2px solid var(--border);
+  background: var(--accent);
+  margin: 0 3px;
+  animation: dotPulse 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
