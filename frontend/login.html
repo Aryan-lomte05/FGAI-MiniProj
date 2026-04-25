@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindBridge - Auth</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      background: var(--surface-2);
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+    .auth-container {
+      background: var(--surface);
+      border: 3px solid var(--border);
+      box-shadow: 6px 6px 0px #000;
+      width: 100%;
+      max-width: 400px;
+      padding: 32px;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .auth-header h1 {
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: -0.05em;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--border);
+      font-family: inherit;
+      font-size: 14px;
+      background: var(--bg);
+      box-shadow: inset 2px 2px 0px rgba(0,0,0,0.05);
+    }
+    .form-control:focus {
+      outline: none;
+      box-shadow: 2px 2px 0px #000;
+      transform: translate(-1px, -1px);
+    }
+    .btn-block {
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px;
+    }
+    .auth-toggle {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .auth-toggle a {
+      color: var(--accent-dim);
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+    .error-msg {
+      color: var(--crisis);
+      font-weight: 700;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container fade-in">
+    <div class="auth-header">
+      <div class="flex justify-center" style="margin-bottom: 16px;">
+        <div style="width: 40px; height: 40px; background: var(--accent); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; box-shadow: 2px 2px 0px #000; font-weight: 800;">MB</div>
+      </div>
+      <h1>Login</h1>
+    </div>
+    
+    <form id="auth-form">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" class="form-control" required>
+      </div>
+      
+      <div id="error-msg" class="error-msg"></div>
+      
+      <button type="submit" class="btn btn-primary btn-block" id="submit-btn">LOGIN</button>
+    </form>
+    
+    <div class="auth-toggle">
+      <span id="toggle-text">Don't have an account?</span> 
+      <a id="toggle-link">Register</a>
+    </div>
+  </div>
+
+  <script src="dist/login.js"></script>
+</body>
+</html>

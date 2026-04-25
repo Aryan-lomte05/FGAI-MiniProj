@@ -8,8 +8,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-// Configuration
 const API_BASE = 'http://127.0.0.1:8000/api';
+if (!localStorage.getItem('token')) {
+    window.location.href = 'login.html';
+}
+function getAuthHeaders(isJson = true) {
+    const h = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
+    if (isJson)
+        h['Content-Type'] = 'application/json';
+    return h;
+}
+function handle401(res) {
+    if (res.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        window.location.href = 'login.html';
+        throw new Error('Unauthorized');
+    }
+}
 let currentSessionId = null;
 const chatEl = document.getElementById('chat');
 const inputEl = document.getElementById('msg-input');
@@ -18,6 +34,12 @@ const titleEl = document.getElementById('chat-title');
 const newBtn = document.getElementById('new-btn');
 const sendBtn = document.getElementById('send-btn');
 const crisisBanner = document.getElementById('crisis-banner');
+const micBtn = document.getElementById('mic-btn');
+const langSelect = document.getElementById('lang-select');
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let currentAudio = null;
 // ── UI Helpers ────────────────────────────────────────────────────────
 function scrollToBottom() {
     chatEl.scrollTop = chatEl.scrollHeight;
@@ -31,11 +53,21 @@ function appendMessage(role, content, isCrisis = false) {
         ? `<p>${content.replace(/\n/g, '<br>')}</p>`
         : marked.parse(content);
     wrapper.innerHTML = `
-    <div class="msg-sender">${sender}</div>
+    <div class="msg-sender">
+      ${sender}
+      ${role !== 'user' ? `<button class="read-aloud-btn" title="Read Aloud" aria-label="Read Aloud">🔊</button>` : ''}
+    </div>
     <div class="msg-bubble">${htmlContent}</div>
   `;
     chatEl.appendChild(wrapper);
+    if (role !== 'user') {
+        const btn = wrapper.querySelector('.read-aloud-btn');
+        if (btn) {
+            btn.onclick = () => readAloud(content, btn);
+        }
+    }
     scrollToBottom();
+    return wrapper;
 }
 function showTyping() {
     const id = 'typing-' + Date.now();
@@ -51,6 +83,140 @@ function showTyping() {
     chatEl.appendChild(wrapper);
     scrollToBottom();
     return id;
+}
+// ── Voice Interactions ──────────────────────────────────────────────────
+function toggleRecording() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (isRecording && mediaRecorder) {
+            mediaRecorder.stop();
+            return;
+        }
+        try {
+            const stream = yield navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0)
+                    audioChunks.push(e.data);
+            };
+            mediaRecorder.onstop = () => __awaiter(this, void 0, void 0, function* () {
+                isRecording = false;
+                micBtn.classList.remove('listening');
+                micBtn.style.animation = 'pulse 1.5s infinite'; // pulsing while uploading
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'audio.webm');
+                try {
+                    const res = yield fetch(`${API_BASE}/stt`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(false),
+                        body: formData
+                    });
+                    handle401(res);
+                    if (!res.ok) {
+                        const err = yield res.json();
+                        alert("STT Error: " + (err.detail || "Transcription failed"));
+                    }
+                    else {
+                        const data = yield res.json();
+                        const transcript = data.text || '';
+                        if (transcript) {
+                            inputEl.value = inputEl.value + (inputEl.value && !inputEl.value.endsWith(' ') ? ' ' : '') + transcript;
+                            inputEl.focus();
+                        }
+                    }
+                }
+                catch (e) {
+                    console.error("STT Fetch Error:", e);
+                }
+                finally {
+                    micBtn.style.animation = ''; // stop pulse
+                    stream.getTracks().forEach(track => track.stop());
+                    mediaRecorder = null;
+                }
+            });
+            mediaRecorder.start();
+            isRecording = true;
+            micBtn.classList.add('listening');
+        }
+        catch (err) {
+            console.error("Error accessing mic:", err);
+            alert("Microphone access is required for speech-to-text.");
+        }
+    });
+}
+function readAloud(text, btnElement) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Stop any currently playing audio
+        if (currentAudio) {
+            const wasPlaying = currentAudio;
+            currentAudio.pause();
+            currentAudio = null;
+            document.querySelectorAll('.read-aloud-btn').forEach(btn => {
+                btn.classList.remove('playing');
+                btn.style.animation = '';
+            });
+            // If the same button was clicked to stop it
+            if (btnElement && btnElement.classList.contains('playing')) {
+                return;
+            }
+        }
+        // Clean markdown for speech
+        const cleanText = text.replace(/[*#`~>_-]/g, '').trim();
+        if (!cleanText)
+            return;
+        if (btnElement) {
+            btnElement.classList.add('playing');
+            btnElement.style.animation = 'pulse 1.5s infinite'; // visual feedback while fetching
+        }
+        try {
+            const res = yield fetch(`${API_BASE}/tts`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ text: cleanText })
+            });
+            handle401(res);
+            if (!res.ok) {
+                const err = yield res.json();
+                console.error("TTS Error:", err);
+                alert(err.detail || "Could not generate audio. Ensure ElevenLabs API key is configured.");
+                if (btnElement) {
+                    btnElement.classList.remove('playing');
+                    btnElement.style.animation = '';
+                }
+                return;
+            }
+            const blob = yield res.blob();
+            const url = URL.createObjectURL(blob);
+            currentAudio = new Audio(url);
+            currentAudio.onended = () => {
+                if (btnElement) {
+                    btnElement.classList.remove('playing');
+                    btnElement.style.animation = '';
+                }
+                URL.revokeObjectURL(url);
+                currentAudio = null;
+            };
+            currentAudio.onerror = () => {
+                if (btnElement) {
+                    btnElement.classList.remove('playing');
+                    btnElement.style.animation = '';
+                }
+                URL.revokeObjectURL(url);
+                currentAudio = null;
+            };
+            if (btnElement)
+                btnElement.style.animation = ''; // stop pulse
+            yield currentAudio.play();
+        }
+        catch (e) {
+            console.error(e);
+            if (btnElement) {
+                btnElement.classList.remove('playing');
+                btnElement.style.animation = '';
+            }
+        }
+    });
 }
 // ── API Interactions ──────────────────────────────────────────────────
 function createNewSession() {
@@ -70,7 +236,8 @@ function createNewSession() {
 function loadSessions() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const res = yield fetch(`${API_BASE}/sessions`);
+            const res = yield fetch(`${API_BASE}/sessions`, { headers: getAuthHeaders() });
+            handle401(res);
             const data = yield res.json();
             return data.sessions || [];
         }
@@ -99,7 +266,8 @@ function loadSessionHistory(sid, title) {
         titleEl.textContent = title || "Chat";
         chatEl.innerHTML = '';
         try {
-            const res = yield fetch(`${API_BASE}/sessions/${sid}/messages`);
+            const res = yield fetch(`${API_BASE}/sessions/${sid}/messages`, { headers: getAuthHeaders() });
+            handle401(res);
             const data = yield res.json();
             data.messages.forEach((m) => {
                 appendMessage(m.role, m.content, m.crisis_triggered);
@@ -120,15 +288,16 @@ function sendMessage() {
             return;
         // Optimistic UI update
         inputEl.value = '';
-        appendMessage('user', text);
+        const userMsgEl = appendMessage('user', text);
         // Create session on first message if needed
         if (!currentSessionId) {
             try {
                 const sRes = yield fetch(`${API_BASE}/sessions/new`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify({ title: text.substring(0, 30) })
                 });
+                handle401(sRes);
                 const sData = yield sRes.json();
                 currentSessionId = sData.session_id;
             }
@@ -139,16 +308,31 @@ function sendMessage() {
         }
         const typingId = showTyping();
         try {
+            const languageText = langSelect.options[langSelect.selectedIndex].text;
             const res = yield fetch(`${API_BASE}/chat`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     session_id: currentSessionId,
-                    message: text
+                    message: text,
+                    language: languageText
                 })
             });
+            handle401(res);
+            if (!res.ok) {
+                throw new Error(`Server error: ${res.status}`);
+            }
             const data = yield res.json();
             (_a = document.getElementById(typingId)) === null || _a === void 0 ? void 0 : _a.remove();
+            if (data.emotion) {
+                const senderDiv = userMsgEl.querySelector('.msg-sender');
+                if (senderDiv) {
+                    const badge = document.createElement('span');
+                    badge.className = 'emotion-badge fade-in';
+                    badge.textContent = `${data.emotion}`;
+                    senderDiv.appendChild(badge);
+                }
+            }
             appendMessage('assistant', data.response, data.crisis_triggered);
             if (data.crisis_triggered) {
                 crisisBanner.style.display = 'flex';
@@ -164,6 +348,14 @@ function sendMessage() {
 // ── Event Listeners ───────────────────────────────────────────────────
 newBtn.addEventListener('click', createNewSession);
 sendBtn.addEventListener('click', sendMessage);
+if (micBtn)
+    micBtn.addEventListener('click', toggleRecording);
+if (langSelect)
+    langSelect.addEventListener('change', () => {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+        }
+    });
 inputEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -176,3 +368,9 @@ window.dismissCrisis = () => {
 };
 // Initial load
 renderSidebar();
+// Expose logout
+window.logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    window.location.href = 'login.html';
+};
